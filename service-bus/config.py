@@ -1,0 +1,11 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+config = {
+  'SERVICE_BUS_CONNECTION_STRING_PUBLISHER': os.environ.get('SERVICE_BUS_CONNECTION_STRING_PUBLISHER'),
+  'SERVICE_BUS_CONNECTION_STRING_SUBSCRIBER': os.environ.get('SERVICE_BUS_CONNECTION_STRING_SUBSCRIBER'),
+  'SERVICE_BUS_QUEUE_NAME': os.environ.get('SERVICE_BUS_QUEUE_NAME'),
+  'SESSION_ID': os.environ.get('SESSION_ID')
+}
