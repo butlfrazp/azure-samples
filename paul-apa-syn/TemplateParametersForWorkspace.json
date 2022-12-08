@@ -1,0 +1,15 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "paul-apa-syn"
+		},
+		"paul-apa-syn-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:paul-apa-syn.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"paul-apa-syn-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://paulapadl.dfs.core.windows.net"
+		}
+	}
+}
