@@ -1,0 +1,181 @@
+{
+	"name": "RawDataGenerator",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "samplesp",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "e9cd3740-5264-4bf7-b7a0-d6e847ce5756"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/471c3172-215c-4465-9229-f07e1bdc7049/resourceGroups/paul-apa-rg/providers/Microsoft.Synapse/workspaces/paul-apa-syn/bigDataPools/samplesp",
+				"name": "samplesp",
+				"type": "Spark",
+				"endpoint": "https://paul-apa-syn.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/samplesp",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.2",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"from datetime import datetime, timedelta\r\n",
+					"import json\r\n",
+					"import pandas as pd\r\n",
+					"import random\r\n",
+					"from uuid import uuid4\r\n",
+					"from pyspark.sql.functions import to_date"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def create_sample(node_id: str, value: int, source_timestamp: datetime, status_code: str):\r\n",
+					"  return {\r\n",
+					"    \"NodeId\": node_id,\r\n",
+					"    \"Value\": value,\r\n",
+					"    \"SourceTimestamp\": source_timestamp,\r\n",
+					"    \"StatusCode\": status_code\r\n",
+					"  }\r\n",
+					"\r\n",
+					"def generate_samples(\r\n",
+					"  number_of_nodes: int,\r\n",
+					"  number_of_values_per_node: int,\r\n",
+					"  timestamp_variance_in_seconds: int,\r\n",
+					"  start_time: datetime):\r\n",
+					"  samples = []\r\n",
+					"  status_code = 0\r\n",
+					"\r\n",
+					"  for _ in range(number_of_nodes):\r\n",
+					"    guid = str(uuid4())\r\n",
+					"    for _ in range(number_of_values_per_node):\r\n",
+					"        node_id = f\"ns=2;s=Number\\\\{guid}\"\r\n",
+					"\r\n",
+					"        value = random.randint(0, number_of_nodes)\r\n",
+					"        source_timestamp_delta_in_seconds = random.randint(0, timestamp_variance_in_seconds)\r\n",
+					"        source_timestamp = start_time + timedelta(0, source_timestamp_delta_in_seconds)\r\n",
+					"\r\n",
+					"        sample = create_sample(node_id, value, source_timestamp, status_code)\r\n",
+					"        samples.append(sample)\r\n",
+					"\r\n",
+					"  df = pd.DataFrame(samples)\r\n",
+					"  return df"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"number_of_nodes = 10000\r\n",
+					"number_of_values_per_node = 180\r\n",
+					"timestamp_variance_in_seconds = 60*60*24*180\r\n",
+					"start_time = datetime(2022, 12, 4)\r\n",
+					"df = generate_samples(number_of_nodes, number_of_values_per_node, timestamp_variance_in_seconds, start_time)\r\n",
+					"\r\n",
+					"print(\"Number of Samples:\", len(df))"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# writing out the dataframe\r\n",
+					"spark_df = spark.createDataFrame(df)\r\n",
+					"spark_df = spark_df \\\r\n",
+					"    .withColumn(\"Date\", to_date(\"SourceTimestamp\"))\r\n",
+					"spark_df.write.partitionBy(\"Date\").format(\"parquet\").mode(\"overwrite\").save(\"raw_data\")\r\n",
+					""
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}
