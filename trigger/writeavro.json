@@ -1,0 +1,24 @@
+{
+	"name": "writeavro",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "writeavro",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 5,
+				"startTime": "2022-12-08T03:13:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
