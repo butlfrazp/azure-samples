@@ -1,0 +1,24 @@
+{
+	"name": "writedelta",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "writedelta",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 5,
+				"startTime": "2022-12-08T03:14:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
